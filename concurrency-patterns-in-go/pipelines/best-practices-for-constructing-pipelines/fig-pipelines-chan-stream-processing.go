@@ -8,7 +8,10 @@ func main() {
 	generator := func(done <-chan interface{}, integers ...int) <-chan int {
 		intStream := make(chan int)
 		go func() {
-			defer close(intStream)
+			defer func() {
+				close(intStream)
+				fmt.Println("Close initStream")
+			}()
 			for _, i := range integers {
 				select {
 				case <-done:
@@ -27,7 +30,10 @@ func main() {
 	) <-chan int {
 		multipliedStream := make(chan int)
 		go func() {
-			defer close(multipliedStream)
+			defer func() {
+				close(multipliedStream)
+				fmt.Println("Close multipliedStream")
+			}()
 			for i := range intStream {
 				select {
 				case <-done:
@@ -46,7 +52,10 @@ func main() {
 	) <-chan int {
 		addedStream := make(chan int)
 		go func() {
-			defer close(addedStream)
+			defer func() {
+				close(addedStream)
+				fmt.Println("Close addedStream")
+			}()
 			for i := range intStream {
 				select {
 				case <-done:
@@ -59,7 +68,10 @@ func main() {
 	}
 
 	done := make(chan interface{})
-	defer close(done)
+	defer func() {
+		close(done)
+		fmt.Println("Close done")
+	}()
 
 	intStream := generator(done, 1, 2, 3, 4)
 	pipeline := multiply(done, add(done, multiply(done, intStream, 2), 1), 2)
